@@ -1,0 +1,10 @@
+---
+_distribution_specific: {
+  Ubuntu: {
+    _xx: yy
+  },
+  Archlinux: {
+    _xx: yy
+  }
+}
+_xx: "{{ _distribution_specific[ansible_distribution]['_xx'] }}"

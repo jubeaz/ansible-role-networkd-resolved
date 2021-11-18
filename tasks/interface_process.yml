@@ -1,0 +1,48 @@
+---
+- name: set var
+  set_fact:
+    _nr_domains: "{{ _i.value['search_d'] |join(' ') }} {{ ['~'] | product(_i.value['routing_d']) | map('join') | join(' ') }}"
+    _nr_DNS: "{{ _i.value['DNS'] }}"
+
+- name: set var
+  set_fact:
+    _nr_options: 
+      LLMNR: "{{ _i.value['LLMNR']}}"
+      MulticastDNS: "{{ _i.value['MulticastDNS'] }}"
+      DNSOverTLS: "{{ _i.value['DNSOverTLS'] }}"
+      DNSSEC: "{{ _i.value['DNSSEC'] }}"
+      Domains: "{{ _nr_domains }}"
+      DNSSECNegativeTrustAnchors: "{{ _i.value['DNSSECNegativeTrustAnchors'] | join(' ') }}"
+
+- name: Set domains "{{ _i.key }}"
+  lineinfile:
+    path: "/etc/systemd/network/{{ _i.key }}.network"
+    group: root
+    owner: root
+    mode: "0644"
+    state: present
+    regexp: "^{{ item.key }}="
+    line: "{{ item.key }}={{ item.value }}"
+  with_dict: "{{ _nr_options }}"
+  notify: Restart systemd-networkd 
+
+- name: Delete all DNS "{{ _i.key }}"
+  lineinfile:
+    path: "/etc/systemd/network/{{ _i.key }}.network²"
+    group: root
+    owner: root
+    mode: "0644"
+    state: absent
+    regexp: "^DNS="
+  notify: Restart systemd-networkd 
+
+- name: reset all DNS "{{ _i.key }}"
+  lineinfile:
+    path: "/etc/systemd/network/{{ _i.key }}.network"
+    group: root
+    owner: root
+    mode: "0644"
+    state: present
+    line: "DNS={{ item }}"
+  with_items: "{{ _nr_DNS }}"
+  notify: Restart systemd-networkd 

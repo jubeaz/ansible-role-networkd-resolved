@@ -1,0 +1,15 @@
+---
+# defaults file for networkd-resolved
+
+nr_interfaces: {
+  test: {
+    search_d: [],
+    routing_d: ["."],
+    LLMNR: false,
+    MulticastDNS: false,
+    DNSOverTLS: false,
+    DNSSEC: false,
+    DNSSECNegativeTrustAnchors: [],
+    DNS: []
+  }
+}
